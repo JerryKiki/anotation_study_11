@@ -111,14 +111,17 @@ public class HomeController {
         return arr;
     }
 
+    //@Data == Getter Setter ToString EqualsAndHashCode RequiredArgsConstructor 다 만들어주는 놈
     @AllArgsConstructor
-    @Getter //@Data == Getter Setter ToString EqualsAndHashCode RequiredArgsConstructor 다 만들어주는 놈
+    @Getter
     @Setter
     @Builder //이 어노테이션이 클래스에 붙어있어야 빌더패턴을 사용할 수 있다.
     @ToString
+    @EqualsAndHashCode(onlyExplicitlyIncluded = true) //객체끼리 비교할때 필드가 같은지 비교를 해줌(Include가 된 필드로만 비교)
     public static class Post {
         @ToString.Exclude //이렇게 하면 id는 ToString을 만들 때 제외된다.
         @JsonIgnore //화면에도 표시 안되게 하고싶어! (ToString 때 제외하는 것과는 별개다)
+        @EqualsAndHashCode.Include //이 경우, id가 같은지 비교
         private Long id;
         private LocalDateTime createDate;
         private LocalDateTime updateDate;
@@ -127,7 +130,7 @@ public class HomeController {
         private String body;
     }
 
-    @GetMapping("/posts")
+    @GetMapping("/posts/1")
     @ResponseBody
     public List<Post> getPost() {
         List<Post> posts = new ArrayList<>() {{
@@ -142,7 +145,8 @@ public class HomeController {
         return posts;
     }
 
-    @GetMapping("/posts2")
+    @SneakyThrows //exception들을 알아서 처리해줌
+    @GetMapping("/posts/2")
     @ResponseBody
     public List<Post> getPost2() {
         List<Post> posts = new ArrayList<>() {{
@@ -180,10 +184,13 @@ public class HomeController {
                     .build());
         }};
 
+        Thread.sleep(5000); //원래라면 throws InterruptedException을 붙여줘야 되는 코드.
+        //SneakyThrows 어노테이션이 붙어있어서 안붙여줘도 되게 되었다
+
         return posts;
     }
 
-    @GetMapping("/posts3")
+    @GetMapping("/posts/3")
     @ResponseBody
     public Post getPost3() {
 
