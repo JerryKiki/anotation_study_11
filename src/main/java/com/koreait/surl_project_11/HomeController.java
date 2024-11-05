@@ -1,9 +1,15 @@
 package com.koreait.surl_project_11;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 public class HomeController {
@@ -49,38 +55,22 @@ public class HomeController {
         return married ? "기혼" : "미혼";
     }
 
+    @Getter
+    @Setter
+    @ToString //주석처리된 형태로 ToString을 자동으로 Override
+    @AllArgsConstructor //필드 변수를 다 써먹을거면 All, 안써먹을거면 No, 필드변수들이 final이면 required
     public static class Person {
+
         private String name;
         private int age;
 
-        public Person(String name, int age) {
-            this.name = name;
-            this.age = age;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public int getAge() {
-            return age;
-        }
-
-        @Override
-        public String toString() {
-            return "Person{" +
-                    "name='" + name + '\'' +
-                    ", age=" + age +
-                    '}';
-        }
-
-        public void setAge(int age) {
-            this.age = age;
-        }
+//        @Override
+//        public String toString() {
+//            return "Person{" +
+//                    "name='" + name + '\'' +
+//                    ", age=" + age +
+//                    '}';
+//        }
     }
 
     @GetMapping("person1")
@@ -111,9 +101,101 @@ public class HomeController {
 
     @GetMapping("f")
     @ResponseBody
-    public int f() {
-        int age = 10;
-        return age;
+    //이렇게 String이 아닌 것을 return 해도, 'jackson'이라는 라이브러리가 알아서 String(JS와의 공용어)로 바꿔서 보냄
+    public ArrayList<int[]> f() {
+        ArrayList<int[]> arr = new ArrayList<>();
+        arr.add(new int[]{1, 2, 3});
+        arr.add(new int[]{2});
+        arr.add(new int[]{3});
+
+        return arr;
+    }
+
+    @AllArgsConstructor
+    @Getter //@Data == Getter Setter ToString EqualsAndHashCode RequiredArgsConstructor 다 만들어주는 놈
+    @Setter
+    @Builder //이 어노테이션이 클래스에 붙어있어야 빌더패턴을 사용할 수 있다.
+    @ToString
+    public static class Post {
+        @ToString.Exclude //이렇게 하면 id는 ToString을 만들 때 제외된다.
+        @JsonIgnore //화면에도 표시 안되게 하고싶어! (ToString 때 제외하는 것과는 별개다)
+        private Long id;
+        private LocalDateTime createDate;
+        private LocalDateTime updateDate;
+        @Builder.Default //이 어노테이션이 있어야 "제목이야"라는 디폴트값을 사용할 수 있다.
+        private String subject = "제목이야";
+        private String body;
+    }
+
+    @GetMapping("/posts")
+    @ResponseBody
+    public List<Post> getPost() {
+        List<Post> posts = new ArrayList<>() {{
+            //여기서 생성과 동시에 객체 생성
+            add(new Post(1L, LocalDateTime.now(), LocalDateTime.now(), "제목1", "내용1"));
+            add(new Post(2L, LocalDateTime.now(), LocalDateTime.now(), "제목2", "내용2"));
+            add(new Post(3L, LocalDateTime.now(), LocalDateTime.now(), "제목3", "내용3"));
+            add(new Post(4L, LocalDateTime.now(), LocalDateTime.now(), "제목4", "내용4"));
+            add(new Post(5L, LocalDateTime.now(), LocalDateTime.now(), "제목5", "내용5"));
+        }};
+
+        return posts;
+    }
+
+    @GetMapping("/posts2")
+    @ResponseBody
+    public List<Post> getPost2() {
+        List<Post> posts = new ArrayList<>() {{
+            add(Post
+                    .builder()
+                    .id(1L)
+                    .createDate(LocalDateTime.now())
+                    .updateDate(LocalDateTime.now())
+                    .subject("제목1")
+                    .body("내용1")
+                    .build());
+            add(Post
+                    .builder()
+                    .id(2L)
+                    .createDate(LocalDateTime.now())
+                    .updateDate(LocalDateTime.now())
+                    .subject("제목2")
+                    .body("내용2")
+                    .build());
+            add(Post
+                    .builder()
+                    .id(3L)
+                    .createDate(LocalDateTime.now())
+                    .updateDate(LocalDateTime.now())
+                    .subject("제목3")
+                    .body("내용3")
+                    .build());
+            add(Post
+                    .builder()
+                    .id(4L)
+                    .createDate(LocalDateTime.now())
+                    .updateDate(LocalDateTime.now())
+                    .subject("제목4")
+                    .body("내용4")
+                    .build());
+        }};
+
+        return posts;
+    }
+
+    @GetMapping("/posts3")
+    @ResponseBody
+    public Post getPost3() {
+
+        Post post = Post.builder()
+                .id(1L)
+                .createDate(LocalDateTime.now())
+                .updateDate(LocalDateTime.now())
+                .body("내용1")
+                .build();
+
+        System.out.println(post);
+        return post;
     }
 }
 
